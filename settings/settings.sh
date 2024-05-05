@@ -13,6 +13,25 @@ RELEASE_CRICTL="1.26.0"
 RELEASE_VERSION="v1.26.0"
 RELEASE_RUNC="v1.1.12"
 
+# choose kuvernetes version
+echo -en "What do you want to download the kubernetes version?\n"
+echo -en "\n1. v1.26.0\n"
+while true; do
+    read version
+    if [ "${version^^}" = "1" ] || [ "${version^^}" = "v1.26.0" ]; then
+        RELEASE_CONTAINERD="1.7.16"
+        RELEASE_CRICTL="1.26.0"
+        RELEASE_VERSION="v1.26.0"
+        RELEASE_RUNC="v1.1.12"
+        break
+    elif [ "${version^^}" = "N" ] || [ "${version^^}" = "NO" ]; then
+        echo ""
+        break
+    else
+        echo -e "\n[Wrong Input]: Please try again "
+    fi
+done
+
 # download the kubernetes environments
 echo -e "[downloading kubernetes environments]"
 
