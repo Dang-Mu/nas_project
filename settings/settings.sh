@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# download ansible
+sudo apt install -y ansible > dev/null 2>&1
+
 # search the architecture (amd64 - x86_64, ard64 - aarch64)
 ARCH=$(dpkg -s libc6 | grep Architecture | awk '{print $2}')
 
@@ -8,20 +11,15 @@ DOWNLOAD_DIR="/tmp"
 INSTALL_DIR="/usr/local/bin"
 
 # setting download release
-RELEASE_CONTAINERD="1.7.16"
-RELEASE_CRICTL="1.26.0"
-RELEASE_VERSION="v1.26.0"
-RELEASE_RUNC="v1.1.12"
-
 # choose kuvernetes version
 echo -en "What do you want to download the kubernetes version?\n"
-echo -en "\n1. v1.26.0\n"
+echo -en "\n1. v1.30.0\n"
 while true; do
     read version
     if [ "${version^^}" = "1" ] || [ "${version^^}" = "v1.26.0" ]; then
         RELEASE_CONTAINERD="1.7.16"
-        RELEASE_CRICTL="1.26.0"
-        RELEASE_VERSION="v1.26.0"
+        RELEASE_CRICTL="1.30.0"
+        RELEASE_VERSION="v1.30.0"
         RELEASE_RUNC="v1.1.12"
         break
     elif [ "${version^^}" = "N" ] || [ "${version^^}" = "NO" ]; then
@@ -37,9 +35,6 @@ echo -e "[downloading kubernetes environments]"
 
 # change working directory to tmp
 cd /tmp
-
-# install helm
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > /dev/null 2>&1
 
 # download the containerd
 echo -e "\n[downloading] containerd"
@@ -134,7 +129,7 @@ else
 fi
 
 echo -e "\n[downloading] kubernestes"
-echo -en "Do you want to download $RELEASE_VERSION kubernetes? (y/n)\n"
+echo -en "\nDo you want to install $RELEASE_VERSION kubernetes? (y/n)\n> "
 while true; do
     read answer
 
@@ -159,12 +154,12 @@ sudo cp $DOWNLOAD_DIR/kubeadm $DOWNLOAD_DIR/kubelet $INSTALL_DIR/
 sudo install -o root -g root -m 0755 kubeadm /usr/local/bin/kubeadm && echo -e "\n[Installing] Kubeadm"
 sudo install -o root -g root -m 0755 kubelet /usr/local/bin/kubelet && echo -e "\n[Installing] Kubelet"
     
-curl -sSL "https://raw.githubusercontent.com/kubernetes/release/$RELEASE_VERSION/cmd/kubepkg/templates/latest/deb/kubelet/lib/systemd/system/kubelet.service" | sed "s:/usr/bin:${INSTALL_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service > /dev/null 2>&1
+curl -sSL "https://dl.k8s.io/$RELEASE_VERSION/bin/linux/$ARCH/kube-apiserver" | sed "s:/usr/bin:${INSTALL_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service > /dev/null 2>&1
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/$RELEASE_VERSION/cmd/kubepkg/templates/latest/deb/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${INSTALL_DIR}:g" | sudo tee /etc/systemd/system/kubelet.service.d/10-kubeadm.conf > /dev/null 2>&1
 
 echo -e "\n[Installing] Kubectl"
-sudo curl -sSL -O "https://dl.k8s.io/release/$RELEASE_VERSION/bin/linux/$ARCH/kubectl"
+sudo curl -sSL -O "https://dl.k8s.io/$RELEASE_VERSION/bin/linux/$ARCH/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # enable and start kubelet as service
